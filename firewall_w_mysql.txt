@@ -1,6 +1,6 @@
 #!/bin/sh
 # My system IP/set ip address of server
-SERVER_IP="149.152.27.99 "
+SERVER_IP="server name or ip "
 # Flushing all rules
 iptables -F
 iptables -X
