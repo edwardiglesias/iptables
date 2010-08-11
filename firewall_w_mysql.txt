@@ -1,0 +1,46 @@
+#!/bin/sh
+# My system IP/set ip address of server
+SERVER_IP="149.152.27.99 "
+# Flushing all rules
+iptables -F
+iptables -X
+# Setting default filter policy
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+# Allow unlimited traffic on loopback
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+#---------------------------------------------------------------
+# Allow previously established connections
+# - Interface eth0 is the internet interface
+#---------------------------------------------------------------
+
+iptables -A OUTPUT -o eth0 -m state --state ESTABLISHED,RELATED \
+  -j ACCEPT
+
+#---------------------------------------------------------------
+# Allow port 80 (www) and 22 (SSH) connections to the firewall
+#---------------------------------------------------------------
+
+iptables -A INPUT -p tcp -i eth0 --dport 22 --sport 1024:65535 \
+  -m state --state NEW -j ACCEPT
+iptables -A INPUT -p tcp -i eth0 --dport 80 --sport 1024:65535 \
+  -m state --state NEW -j ACCEPT
+#---------------------------------------------------------------
+# Allow port 80 (www) and 443 (https) connections from the firewall
+#---------------------------------------------------------------
+
+iptables -A OUTPUT -j ACCEPT -m state \
+  --state NEW,ESTABLISHED,RELATED -o eth0 -p tcp \
+
+#---------------------------------------------------------------
+# Allow previously established connections
+# - Interface eth0 is the internet interface
+#---------------------------------------------------------------
+
+iptables -A INPUT -j ACCEPT -m state --state ESTABLISHED,RELATED  \
+-i eth0 -p tcp
+
+#Allow mysql clients
+iptables -A INPUT -s 1.2.3.4 -p tcp -m state --state NEW -m tcp --dport 3306 -j ACCEPT
